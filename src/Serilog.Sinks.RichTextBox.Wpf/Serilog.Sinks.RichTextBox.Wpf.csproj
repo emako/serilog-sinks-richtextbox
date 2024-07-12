@@ -29,7 +29,7 @@
   <PropertyGroup>
     <MinClientVersion>3.3</MinClientVersion>
     <PackageId>Serilog.Sinks.RichTextBoxEx.Wpf</PackageId>
-    <Version>1.1.0.0</Version>
+    <Version>1.1.0.1</Version>
     <Authors>C. Augusto Proiete &amp; Contributors</Authors>
     <Company>augustoproiete.net</Company>
     <Description>A Serilog sink that writes log events to any WPF RichTextBox control with coloring and custom theme support. BUT modified version, and the `Ex` equals `Export`, non-internal classes.</Description>
