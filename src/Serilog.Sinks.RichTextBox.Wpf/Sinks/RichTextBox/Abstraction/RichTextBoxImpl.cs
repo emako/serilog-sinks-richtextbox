@@ -19,6 +19,7 @@
 using Serilog.Debugging;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Threading;
@@ -77,8 +78,8 @@ public class RichTextBoxImpl : IRichTextBox
         return RichTextBox?.CheckAccess() ?? false;
     }
 
-    public DispatcherOperation BeginInvoke(DispatcherPriority priority, Delegate method, object arg)
+    public Task BeginInvoke(DispatcherPriority priority, Delegate method, object arg)
     {
-        return RichTextBox?.Dispatcher.BeginInvoke(priority, method, arg) ?? default!;
+        return RichTextBox?.Dispatcher.BeginInvoke(priority, method, arg).Task ?? Task.CompletedTask;
     }
 }

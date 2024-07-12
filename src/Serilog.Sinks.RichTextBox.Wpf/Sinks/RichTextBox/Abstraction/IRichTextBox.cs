@@ -17,6 +17,7 @@
 #endregion
 
 using System;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 
 namespace Serilog.Sinks.RichTextBox.Abstraction;
@@ -29,5 +30,5 @@ public interface IRichTextBox
 
     bool CheckAccess();
 
-    public DispatcherOperation BeginInvoke(DispatcherPriority priority, Delegate method, object arg);
+    public Task BeginInvoke(DispatcherPriority priority, Delegate method, object arg);
 }
