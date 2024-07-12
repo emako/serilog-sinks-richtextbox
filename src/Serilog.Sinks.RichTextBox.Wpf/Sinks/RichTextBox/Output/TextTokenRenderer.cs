@@ -1,4 +1,5 @@
 ﻿#region Copyright 2021-2023 C. Augusto Proiete & Contributors
+
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 using System.IO;
@@ -19,29 +21,28 @@ using Serilog.Events;
 using Serilog.Sinks.RichTextBox.Rendering;
 using Serilog.Sinks.RichTextBox.Themes;
 
-namespace Serilog.Sinks.RichTextBox.Output
+namespace Serilog.Sinks.RichTextBox.Output;
+
+public class TextTokenRenderer : OutputTemplateTokenRenderer
 {
-    internal class TextTokenRenderer : OutputTemplateTokenRenderer
+    private readonly RichTextBoxTheme _theme;
+    private readonly string _text;
+
+    public TextTokenRenderer(RichTextBoxTheme theme, string text)
     {
-        private readonly RichTextBoxTheme _theme;
-        private readonly string _text;
+        _theme = theme;
+        _text = text;
+    }
 
-        public TextTokenRenderer(RichTextBoxTheme theme, string text)
+    public override void Render(LogEvent logEvent, TextWriter output)
+    {
+        var _ = 0;
+        var text = _text;
+
+        using (_theme.Apply(output, RichTextBoxThemeStyle.TertiaryText, ref _))
         {
-            _theme = theme;
-            _text = text;
-        }
-
-        public override void Render(LogEvent logEvent, TextWriter output)
-        {
-            var _ = 0;
-            var text = _text;
-
-            using (_theme.Apply(output, RichTextBoxThemeStyle.TertiaryText, ref _))
-            {
-                text = SpecialCharsEscaping.Apply(text, ref _);
-                output.Write(text);
-            }
+            text = SpecialCharsEscaping.Apply(text, ref _);
+            output.Write(text);
         }
     }
 }

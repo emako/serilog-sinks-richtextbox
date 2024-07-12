@@ -1,4 +1,5 @@
 ﻿#region Copyright 2021-2023 C. Augusto Proiete & Contributors
+
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,51 +13,51 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 using System.IO;
 using Serilog.Parsing;
 
-namespace Serilog.Sinks.RichTextBox.Rendering
+namespace Serilog.Sinks.RichTextBox.Rendering;
+
+public static class Padding
 {
-    internal static class Padding
+    private static readonly char[] _paddingChars = new string(' ', 80).ToCharArray();
+
+    /// <summary>
+    /// Writes the provided value to the output, applying direction-based padding when <paramref name="alignment"/> is provided.
+    /// </summary>
+    /// <param name="output">Output object to write result.</param>
+    /// <param name="value">Provided value.</param>
+    /// <param name="alignment">The alignment settings to apply when rendering <paramref name="value"/>.</param>
+    public static void Apply(TextWriter output, string value, Alignment? alignment)
     {
-        private static readonly char[] _paddingChars = new string(' ', 80).ToCharArray();
-
-        /// <summary>
-        /// Writes the provided value to the output, applying direction-based padding when <paramref name="alignment"/> is provided.
-        /// </summary>
-        /// <param name="output">Output object to write result.</param>
-        /// <param name="value">Provided value.</param>
-        /// <param name="alignment">The alignment settings to apply when rendering <paramref name="value"/>.</param>
-        public static void Apply(TextWriter output, string value, Alignment? alignment)
+        if (alignment is null || value.Length >= alignment.Value.Width)
         {
-            if (alignment is null || value.Length >= alignment.Value.Width)
-            {
-                output.Write(value);
-                return;
-            }
+            output.Write(value);
+            return;
+        }
 
-            var pad = alignment.Value.Width - value.Length;
+        var pad = alignment.Value.Width - value.Length;
 
-            if (alignment.Value.Direction == AlignmentDirection.Left)
-            {
-                output.Write(value);
-            }
+        if (alignment.Value.Direction == AlignmentDirection.Left)
+        {
+            output.Write(value);
+        }
 
-            if (pad <= _paddingChars.Length)
-            {
-                output.Write(_paddingChars, 0, pad);
-            }
-            else
-            {
-                output.Write(new string(' ', pad));
-            }
+        if (pad <= _paddingChars.Length)
+        {
+            output.Write(_paddingChars, 0, pad);
+        }
+        else
+        {
+            output.Write(new string(' ', pad));
+        }
 
-            if (alignment.Value.Direction == AlignmentDirection.Right)
-            {
-                output.Write(value);
-            }
+        if (alignment.Value.Direction == AlignmentDirection.Right)
+        {
+            output.Write(value);
         }
     }
 }

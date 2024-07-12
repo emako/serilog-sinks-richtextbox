@@ -1,4 +1,5 @@
 ﻿#region Copyright 2021-2023 C. Augusto Proiete & Contributors
+
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 using System;
@@ -22,59 +24,59 @@ using Serilog.Sinks.RichTextBox.Formatting;
 using Serilog.Sinks.RichTextBox.Rendering;
 using Serilog.Sinks.RichTextBox.Themes;
 
-namespace Serilog.Sinks.RichTextBox.Output
+namespace Serilog.Sinks.RichTextBox.Output;
+
+public class MessageTemplateOutputTokenRenderer : OutputTemplateTokenRenderer
 {
-    internal class MessageTemplateOutputTokenRenderer : OutputTemplateTokenRenderer
+    private readonly RichTextBoxTheme _theme;
+    private readonly PropertyToken _token;
+    private readonly ThemedMessageTemplateRenderer _renderer;
+
+    public MessageTemplateOutputTokenRenderer(RichTextBoxTheme theme, PropertyToken token, IFormatProvider formatProvider)
     {
-        private readonly RichTextBoxTheme _theme;
-        private readonly PropertyToken _token;
-        private readonly ThemedMessageTemplateRenderer _renderer;
+        _theme = theme ?? throw new ArgumentNullException(nameof(theme));
+        _token = token ?? throw new ArgumentNullException(nameof(token));
 
-        public MessageTemplateOutputTokenRenderer(RichTextBoxTheme theme, PropertyToken token, IFormatProvider formatProvider)
+        var isLiteral = false;
+        var isJson = false;
+
+        if (token.Format != null)
         {
-            _theme = theme ?? throw new ArgumentNullException(nameof(theme));
-            _token = token ?? throw new ArgumentNullException(nameof(token));
-
-            var isLiteral = false;
-            var isJson = false;
-
-            if (token.Format != null)
+            // ReSharper disable once ForCanBeConvertedToForeach
+            for (var i = 0; i < token.Format.Length; ++i)
             {
-                // ReSharper disable once ForCanBeConvertedToForeach
-                for (var i = 0; i < token.Format.Length; ++i)
+                switch (token.Format[i])
                 {
-                    switch (token.Format[i])
-                    {
-                        case 'l':
-                            isLiteral = true;
-                            break;
-                        case 'j':
-                            isJson = true;
-                            break;
-                    }
+                    case 'l':
+                        isLiteral = true;
+                        break;
+
+                    case 'j':
+                        isJson = true;
+                        break;
                 }
             }
-
-            var valueFormatter = isJson
-                ? (ThemedValueFormatter)new ThemedJsonValueFormatter(theme, formatProvider)
-                : new ThemedDisplayValueFormatter(theme, formatProvider);
-
-            _renderer = new ThemedMessageTemplateRenderer(theme, valueFormatter, isLiteral);
         }
 
-        public override void Render(LogEvent logEvent, TextWriter output)
+        var valueFormatter = isJson
+            ? (ThemedValueFormatter)new ThemedJsonValueFormatter(theme, formatProvider)
+            : new ThemedDisplayValueFormatter(theme, formatProvider);
+
+        _renderer = new ThemedMessageTemplateRenderer(theme, valueFormatter, isLiteral);
+    }
+
+    public override void Render(LogEvent logEvent, TextWriter output)
+    {
+        if (_token.Alignment is null || !_theme.CanBuffer)
         {
-            if (_token.Alignment is null || !_theme.CanBuffer)
-            {
-                _renderer.Render(logEvent.MessageTemplate, logEvent.Properties, output);
-                return;
-            }
-
-            var buffer = new StringWriter();
-            var invisible = _renderer.Render(logEvent.MessageTemplate, logEvent.Properties, buffer);
-            var value = buffer.ToString();
-
-            Padding.Apply(output, value, _token.Alignment.Value.Widen(invisible));
+            _renderer.Render(logEvent.MessageTemplate, logEvent.Properties, output);
+            return;
         }
+
+        var buffer = new StringWriter();
+        var invisible = _renderer.Render(logEvent.MessageTemplate, logEvent.Properties, buffer);
+        var value = buffer.ToString();
+
+        Padding.Apply(output, value, _token.Alignment.Value.Widen(invisible));
     }
 }

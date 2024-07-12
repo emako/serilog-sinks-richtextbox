@@ -1,4 +1,5 @@
 ﻿#region Copyright 2021-2023 C. Augusto Proiete & Contributors
+
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,63 +13,72 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
+using Serilog.Debugging;
 using System;
 using System.Linq;
 using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Threading;
-using Serilog.Debugging;
 
-namespace Serilog.Sinks.RichTextBox.Abstraction
+namespace Serilog.Sinks.RichTextBox.Abstraction;
+
+public class RichTextBoxImpl : IRichTextBox
 {
-    internal class RichTextBoxImpl : IRichTextBox
+    public System.Windows.Controls.RichTextBox RichTextBox { get; set; } = null!;
+
+    public RichTextBoxImpl()
     {
-        private readonly System.Windows.Controls.RichTextBox _richTextBox;
+    }
 
-        public RichTextBoxImpl(System.Windows.Controls.RichTextBox richTextBox)
+    public RichTextBoxImpl(System.Windows.Controls.RichTextBox richTextBox)
+    {
+        RichTextBox = richTextBox;
+    }
+
+    public void Write(string xamlParagraphText)
+    {
+        if (RichTextBox == null)
         {
-            _richTextBox = richTextBox ?? throw new ArgumentNullException(nameof(richTextBox));
+            return;
         }
 
-        public void Write(string xamlParagraphText)
+        Paragraph parsedParagraph;
+
+        try
         {
-            Paragraph parsedParagraph;
-
-            try
-            {
-                parsedParagraph = (Paragraph) XamlReader.Parse(xamlParagraphText);
-            }
-            catch (XamlParseException ex)
-            {
-                SelfLog.WriteLine($"Error parsing `{xamlParagraphText}` to XAML: {ex.Message}");
-                throw;
-            }
-
-            var inlines = parsedParagraph.Inlines.ToList();
-
-            var richTextBox = _richTextBox;
-
-            var flowDocument = richTextBox.Document ??= new FlowDocument();
-
-            if (flowDocument.Blocks.LastBlock is not Paragraph paragraph)
-            {
-                paragraph = new Paragraph();
-                flowDocument.Blocks.Add(paragraph);
-            }
-
-            paragraph.Inlines.AddRange(inlines);
+            parsedParagraph = (Paragraph)XamlReader.Parse(xamlParagraphText);
+        }
+        catch (XamlParseException ex)
+        {
+            SelfLog.WriteLine($"Error parsing `{xamlParagraphText}` to XAML: {ex.Message}");
+            throw;
         }
 
-        public bool CheckAccess()
+        var inlines = parsedParagraph.Inlines.ToList();
+
+        var richTextBox = RichTextBox;
+
+        var flowDocument = richTextBox.Document ??= new FlowDocument();
+
+        if (flowDocument.Blocks.LastBlock is not Paragraph paragraph)
         {
-            return _richTextBox.CheckAccess();
+            paragraph = new Paragraph();
+            flowDocument.Blocks.Add(paragraph);
         }
 
-        public DispatcherOperation BeginInvoke(DispatcherPriority priority, Delegate method, object arg)
-        {
-            return _richTextBox.Dispatcher.BeginInvoke(priority, method, arg);
-        }
+        paragraph.Inlines.AddRange(inlines);
+    }
+
+    public bool CheckAccess()
+    {
+        return RichTextBox?.CheckAccess() ?? false;
+    }
+
+    public DispatcherOperation BeginInvoke(DispatcherPriority priority, Delegate method, object arg)
+    {
+        return RichTextBox?.Dispatcher.BeginInvoke(priority, method, arg) ?? default!;
     }
 }

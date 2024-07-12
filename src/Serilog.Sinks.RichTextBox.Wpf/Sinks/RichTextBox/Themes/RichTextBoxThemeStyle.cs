@@ -1,4 +1,5 @@
 ﻿#region Copyright 2021-2023 C. Augusto Proiete & Contributors
+
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,94 +13,94 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 using System;
 
-namespace Serilog.Sinks.RichTextBox.Themes
+namespace Serilog.Sinks.RichTextBox.Themes;
+
+public enum RichTextBoxThemeStyle
 {
-    public enum RichTextBoxThemeStyle
-    {
-        /// <summary>
-        /// Prominent text, generally content within an event's message.
-        /// </summary>
-        Text,
+    /// <summary>
+    /// Prominent text, generally content within an event's message.
+    /// </summary>
+    Text,
 
-        /// <summary>
-        /// Boilerplate text, for example items specified in an output template.
-        /// </summary>
-        SecondaryText,
+    /// <summary>
+    /// Boilerplate text, for example items specified in an output template.
+    /// </summary>
+    SecondaryText,
 
-        /// <summary>
-        /// De-emphasized text, for example literal text in output templates and
-        /// punctuation used when writing structured data.
-        /// </summary>
-        TertiaryText,
+    /// <summary>
+    /// De-emphasized text, for example literal text in output templates and
+    /// punctuation used when writing structured data.
+    /// </summary>
+    TertiaryText,
 
-        /// <summary>
-        /// Output demonstrating some kind of configuration issue, e.g. an invalid
-        /// message template token.
-        /// </summary>
-        Invalid,
+    /// <summary>
+    /// Output demonstrating some kind of configuration issue, e.g. an invalid
+    /// message template token.
+    /// </summary>
+    Invalid,
 
-        /// <summary>
-        /// The built-in <see langword="null"/> value.
-        /// </summary>
-        Null,
+    /// <summary>
+    /// The built-in <see langword="null"/> value.
+    /// </summary>
+    Null,
 
-        /// <summary>
-        /// Property and type names.
-        /// </summary>
-        Name,
+    /// <summary>
+    /// Property and type names.
+    /// </summary>
+    Name,
 
-        /// <summary>
-        /// Strings.
-        /// </summary>
-        String,
+    /// <summary>
+    /// Strings.
+    /// </summary>
+    String,
 
-        /// <summary>
-        /// Numbers.
-        /// </summary>
-        Number,
+    /// <summary>
+    /// Numbers.
+    /// </summary>
+    Number,
 
-        /// <summary>
-        /// <see cref="bool"/> values.
-        /// </summary>
-        Boolean,
+    /// <summary>
+    /// <see cref="bool"/> values.
+    /// </summary>
+    Boolean,
 
-        /// <summary>
-        /// All other scalar values, e.g. <see cref="Guid"/> instances.
-        /// </summary>
-        Scalar,
+    /// <summary>
+    /// All other scalar values, e.g. <see cref="Guid"/> instances.
+    /// </summary>
+    Scalar,
 
-        /// <summary>
-        /// Level indicator.
-        /// </summary>
-        LevelVerbose,
+    /// <summary>
+    /// Level indicator.
+    /// </summary>
+    LevelVerbose,
 
-        /// <summary>
-        /// Level indicator.
-        /// </summary>
-        LevelDebug,
+    /// <summary>
+    /// Level indicator.
+    /// </summary>
+    LevelDebug,
 
-        /// <summary>
-        /// Level indicator.
-        /// </summary>
-        LevelInformation,
+    /// <summary>
+    /// Level indicator.
+    /// </summary>
+    LevelInformation,
 
-        /// <summary>
-        /// Level indicator.
-        /// </summary>
-        LevelWarning,
+    /// <summary>
+    /// Level indicator.
+    /// </summary>
+    LevelWarning,
 
-        /// <summary>
-        /// Level indicator.
-        /// </summary>
-        LevelError,
+    /// <summary>
+    /// Level indicator.
+    /// </summary>
+    LevelError,
 
-        /// <summary>
-        /// Level indicator.
-        /// </summary>
-        LevelFatal,
-    }
+    /// <summary>
+    /// Level indicator.
+    /// </summary>
+    LevelFatal,
 }

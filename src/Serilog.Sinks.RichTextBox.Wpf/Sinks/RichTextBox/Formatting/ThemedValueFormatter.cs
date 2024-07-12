@@ -1,4 +1,5 @@
 ﻿#region Copyright 2021-2023 C. Augusto Proiete & Contributors
+
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 using System;
@@ -20,27 +22,26 @@ using Serilog.Data;
 using Serilog.Events;
 using Serilog.Sinks.RichTextBox.Themes;
 
-namespace Serilog.Sinks.RichTextBox.Formatting
+namespace Serilog.Sinks.RichTextBox.Formatting;
+
+public abstract class ThemedValueFormatter : LogEventPropertyValueVisitor<ThemedValueFormatterState, int>
 {
-    internal abstract class ThemedValueFormatter : LogEventPropertyValueVisitor<ThemedValueFormatterState, int>
+    private readonly RichTextBoxTheme _theme;
+
+    protected ThemedValueFormatter(RichTextBoxTheme theme)
     {
-        private readonly RichTextBoxTheme _theme;
-
-        protected ThemedValueFormatter(RichTextBoxTheme theme)
-        {
-            _theme = theme ?? throw new ArgumentNullException(nameof(theme));
-        }
-
-        protected StyleReset ApplyStyle(TextWriter output, RichTextBoxThemeStyle style, ref int invisibleCharacterCount)
-        {
-            return _theme.Apply(output, style, ref invisibleCharacterCount);
-        }
-
-        public int Format(LogEventPropertyValue value, TextWriter output, string format, bool literalTopLevel = false)
-        {
-            return Visit(new ThemedValueFormatterState { Output = output, Format = format, IsTopLevel = literalTopLevel }, value);
-        }
-
-        public abstract ThemedValueFormatter SwitchTheme(RichTextBoxTheme theme);
+        _theme = theme ?? throw new ArgumentNullException(nameof(theme));
     }
+
+    protected StyleReset ApplyStyle(TextWriter output, RichTextBoxThemeStyle style, ref int invisibleCharacterCount)
+    {
+        return _theme.Apply(output, style, ref invisibleCharacterCount);
+    }
+
+    public int Format(LogEventPropertyValue value, TextWriter output, string format, bool literalTopLevel = false)
+    {
+        return Visit(new ThemedValueFormatterState { Output = output, Format = format, IsTopLevel = literalTopLevel }, value);
+    }
+
+    public abstract ThemedValueFormatter SwitchTheme(RichTextBoxTheme theme);
 }

@@ -1,4 +1,5 @@
 ﻿#region Copyright 2021-2023 C. Augusto Proiete & Contributors
+
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 using System;
@@ -21,43 +23,42 @@ using Serilog.Parsing;
 using Serilog.Sinks.RichTextBox.Rendering;
 using Serilog.Sinks.RichTextBox.Themes;
 
-namespace Serilog.Sinks.RichTextBox.Output
+namespace Serilog.Sinks.RichTextBox.Output;
+
+public class TimestampTokenRenderer : OutputTemplateTokenRenderer
 {
-    internal class TimestampTokenRenderer : OutputTemplateTokenRenderer
+    private readonly RichTextBoxTheme _theme;
+    private readonly PropertyToken _token;
+    private readonly IFormatProvider _formatProvider;
+
+    public TimestampTokenRenderer(RichTextBoxTheme theme, PropertyToken token, IFormatProvider formatProvider)
     {
-        private readonly RichTextBoxTheme _theme;
-        private readonly PropertyToken _token;
-        private readonly IFormatProvider _formatProvider;
+        _theme = theme;
+        _token = token;
+        _formatProvider = formatProvider;
+    }
 
-        public TimestampTokenRenderer(RichTextBoxTheme theme, PropertyToken token, IFormatProvider formatProvider)
+    public override void Render(LogEvent logEvent, TextWriter output)
+    {
+        // We need access to ScalarValue.Render() to avoid this alloc; just ensures
+        // that custom format providers are supported properly.
+        var sv = new ScalarValue(logEvent.Timestamp);
+
+        var _ = 0;
+
+        using (_theme.Apply(output, RichTextBoxThemeStyle.SecondaryText, ref _))
         {
-            _theme = theme;
-            _token = token;
-            _formatProvider = formatProvider;
-        }
-
-        public override void Render(LogEvent logEvent, TextWriter output)
-        {
-            // We need access to ScalarValue.Render() to avoid this alloc; just ensures
-            // that custom format providers are supported properly.
-            var sv = new ScalarValue(logEvent.Timestamp);
-
-            var _ = 0;
-
-            using (_theme.Apply(output, RichTextBoxThemeStyle.SecondaryText, ref _))
+            if (_token.Alignment is null)
             {
-                if (_token.Alignment is null)
-                {
-                    sv.Render(output, _token.Format, _formatProvider);
-                }
-                else
-                {
-                    var buffer = new StringWriter();
-                    sv.Render(buffer, _token.Format, _formatProvider);
+                sv.Render(output, _token.Format, _formatProvider);
+            }
+            else
+            {
+                var buffer = new StringWriter();
+                sv.Render(buffer, _token.Format, _formatProvider);
 
-                    var str = buffer.ToString();
-                    Padding.Apply(output, str, _token.Alignment);
-                }
+                var str = buffer.ToString();
+                Padding.Apply(output, str, _token.Alignment);
             }
         }
     }

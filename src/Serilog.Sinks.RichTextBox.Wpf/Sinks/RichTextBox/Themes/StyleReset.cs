@@ -1,4 +1,5 @@
 ﻿#region Copyright 2021-2023 C. Augusto Proiete & Contributors
+
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +13,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 using System;
 using System.IO;
 
-namespace Serilog.Sinks.RichTextBox.Themes
+namespace Serilog.Sinks.RichTextBox.Themes;
+
+public readonly struct StyleReset : IDisposable
 {
-    internal readonly struct StyleReset : IDisposable
+    private readonly RichTextBoxTheme _theme;
+    private readonly TextWriter _output;
+
+    public StyleReset(RichTextBoxTheme theme, TextWriter output)
     {
-        private readonly RichTextBoxTheme _theme;
-        private readonly TextWriter _output;
+        _theme = theme;
+        _output = output;
+    }
 
-        public StyleReset(RichTextBoxTheme theme, TextWriter output)
-        {
-            _theme = theme;
-            _output = output;
-        }
-
-        public void Dispose()
-        {
-            _theme.Reset(_output);
-        }
+    public void Dispose()
+    {
+        _theme.Reset(_output);
     }
 }

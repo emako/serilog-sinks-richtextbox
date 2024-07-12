@@ -1,4 +1,5 @@
 ﻿#region Copyright 2021-2023 C. Augusto Proiete & Contributors
+
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +13,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 using System;
 using System.Windows.Threading;
 
-namespace Serilog.Sinks.RichTextBox.Abstraction
+namespace Serilog.Sinks.RichTextBox.Abstraction;
+
+public interface IRichTextBox
 {
-    internal interface IRichTextBox
-    {
-        void Write(string xamlParagraphText);
+    public System.Windows.Controls.RichTextBox RichTextBox { get; set; }
 
-        bool CheckAccess();
+    void Write(string xamlParagraphText);
 
-        public DispatcherOperation BeginInvoke(DispatcherPriority priority, Delegate method, object arg);
-    }
+    bool CheckAccess();
+
+    public DispatcherOperation BeginInvoke(DispatcherPriority priority, Delegate method, object arg);
 }

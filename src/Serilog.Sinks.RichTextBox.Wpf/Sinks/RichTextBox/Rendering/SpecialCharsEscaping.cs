@@ -1,4 +1,5 @@
 ﻿#region Copyright 2021-2023 C. Augusto Proiete & Contributors
+
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 using System.Security;
 
-namespace Serilog.Sinks.RichTextBox.Rendering
-{
-    internal static class SpecialCharsEscaping
-    {
-        public static string Apply(string value, ref int invisibleCharacterCount)
-        {
-            var escapedValue = SecurityElement.Escape(value) ?? string.Empty;
-            invisibleCharacterCount += escapedValue.Length - value.Length;
+namespace Serilog.Sinks.RichTextBox.Rendering;
 
-            return escapedValue;
-        }
+public static class SpecialCharsEscaping
+{
+    public static string Apply(string value, ref int invisibleCharacterCount)
+    {
+        var escapedValue = SecurityElement.Escape(value) ?? string.Empty;
+        invisibleCharacterCount += escapedValue.Length - value.Length;
+
+        return escapedValue;
     }
 }

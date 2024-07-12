@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0-windows;net5.0-windows;netcoreapp3.1;net462</TargetFrameworks>
+    <TargetFrameworks>net8.0-windows;net7.0-windows;net6.0-windows;net5.0-windows;net462</TargetFrameworks>
     <UseWPF>true</UseWPF>
     <RootNamespace>Serilog</RootNamespace>
 
-    <AssemblyName>Serilog.Sinks.RichTextBox.Wpf</AssemblyName>
+    <AssemblyName>Serilog.Sinks.RichTextBoxEx.Wpf</AssemblyName>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <GenerateAssemblyVersionAttribute>true</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>true</GenerateAssemblyFileVersionAttribute>
@@ -28,20 +28,21 @@
 
   <PropertyGroup>
     <MinClientVersion>3.3</MinClientVersion>
-    <PackageId>Serilog.Sinks.RichTextBox.Wpf</PackageId>
-    <Version>0.0.1-local</Version>
+    <PackageId>Serilog.Sinks.RichTextBoxEx.Wpf</PackageId>
+    <Version>1.1.0.0</Version>
     <Authors>C. Augusto Proiete &amp; Contributors</Authors>
     <Company>augustoproiete.net</Company>
-    <Description>A Serilog sink that writes log events to any WPF RichTextBox control with coloring and custom theme support.</Description>
+    <Description>A Serilog sink that writes log events to any WPF RichTextBox control with coloring and custom theme support. BUT modified version, and the `Ex` equals `Export`, non-internal classes.</Description>
     <Copyright>Copyright 2021-2023 C. Augusto Proiete &amp; Contributors - Provided under the Apache License, Version 2.0</Copyright>
     <PackageTags>serilog;sinks;richtextbox;wpf;windows;sink;colored;colors;color;theme;themes;windows-presentation-foundation;textbox;serilog-sink;serilog-contrib;augustoproiete;augusto-proiete</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>images\icon.png</PackageIcon>
     <PackageIconUrl>http://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
-    <PackageProjectUrl>https://github.com/serilog-contrib/serilog-sinks-richtextbox</PackageProjectUrl>
-    <PackageReleaseNotes>https://github.com/serilog-contrib/serilog-sinks-richtextbox/releases</PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/emako/serilog-sinks-richtextbox</PackageProjectUrl>
+    <PackageReleaseNotes>https://github.com/emako/serilog-sinks-richtextbox/releases</PackageReleaseNotes>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/serilog-contrib/serilog-sinks-richtextbox.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/emako/serilog-sinks-richtextbox.git</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -66,7 +67,6 @@
 
   <ItemGroup>
     <PackageReference Include="Serilog" Version="2.12.0" />
-
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
@@ -85,6 +85,13 @@
 
   <ItemGroup>
     <None Include="..\..\asset\serilog-sink-nuget.png" Pack="true" Visible="false" PackagePath="images\icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
 ﻿#region Copyright 2021-2023 C. Augusto Proiete & Contributors
+
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 using System;
@@ -22,255 +24,254 @@ using Serilog.Formatting.Json;
 using Serilog.Sinks.RichTextBox.Rendering;
 using Serilog.Sinks.RichTextBox.Themes;
 
-namespace Serilog.Sinks.RichTextBox.Formatting
+namespace Serilog.Sinks.RichTextBox.Formatting;
+
+public class ThemedDisplayValueFormatter : ThemedValueFormatter
 {
-    internal class ThemedDisplayValueFormatter : ThemedValueFormatter
+    private readonly IFormatProvider _formatProvider;
+
+    public ThemedDisplayValueFormatter(RichTextBoxTheme theme, IFormatProvider formatProvider)
+        : base(theme)
     {
-        private readonly IFormatProvider _formatProvider;
+        _formatProvider = formatProvider;
+    }
 
-        public ThemedDisplayValueFormatter(RichTextBoxTheme theme, IFormatProvider formatProvider)
-            : base(theme)
+    public override ThemedValueFormatter SwitchTheme(RichTextBoxTheme theme)
+    {
+        return new ThemedDisplayValueFormatter(theme, _formatProvider);
+    }
+
+    protected override int VisitScalarValue(ThemedValueFormatterState state, ScalarValue scalar)
+    {
+        if (scalar is null)
         {
-            _formatProvider = formatProvider;
+            throw new ArgumentNullException(nameof(scalar));
         }
 
-        public override ThemedValueFormatter SwitchTheme(RichTextBoxTheme theme)
+        return FormatLiteralValue(scalar, state.Output, state.Format);
+    }
+
+    protected override int VisitSequenceValue(ThemedValueFormatterState state, SequenceValue sequence)
+    {
+        if (sequence is null)
         {
-            return new ThemedDisplayValueFormatter(theme, _formatProvider);
+            throw new ArgumentNullException(nameof(sequence));
         }
 
-        protected override int VisitScalarValue(ThemedValueFormatterState state, ScalarValue scalar)
+        var count = 0;
+
+        using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
         {
-            if (scalar is null)
+            state.Output.Write('[');
+        }
+
+        var delim = string.Empty;
+
+        // ReSharper disable once ForCanBeConvertedToForeach
+        for (var index = 0; index < sequence.Elements.Count; ++index)
+        {
+            if (delim.Length != 0)
             {
-                throw new ArgumentNullException(nameof(scalar));
+                using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
+                {
+                    state.Output.Write(delim);
+                }
             }
 
-            return FormatLiteralValue(scalar, state.Output, state.Format);
+            delim = ", ";
+            Visit(state, sequence.Elements[index]);
         }
 
-        protected override int VisitSequenceValue(ThemedValueFormatterState state, SequenceValue sequence)
+        using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
         {
-            if (sequence is null)
+            state.Output.Write(']');
+        }
+
+        return count;
+    }
+
+    protected override int VisitStructureValue(ThemedValueFormatterState state, StructureValue structure)
+    {
+        var count = 0;
+
+        if (structure.TypeTag != null)
+        {
+            using (ApplyStyle(state.Output, RichTextBoxThemeStyle.Name, ref count))
             {
-                throw new ArgumentNullException(nameof(sequence));
+                state.Output.Write(structure.TypeTag);
             }
 
-            var count = 0;
+            state.Output.Write(' ');
+        }
+
+        using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
+        {
+            state.Output.Write('{');
+        }
+
+        var delim = string.Empty;
+
+        // ReSharper disable once ForCanBeConvertedToForeach
+        for (var index = 0; index < structure.Properties.Count; ++index)
+        {
+            if (delim.Length != 0)
+            {
+                using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
+                {
+                    state.Output.Write(delim);
+                }
+            }
+
+            delim = ", ";
+
+            var property = structure.Properties[index];
+
+            using (ApplyStyle(state.Output, RichTextBoxThemeStyle.Name, ref count))
+            {
+                var escapedPropertyName = SpecialCharsEscaping.Apply(property.Name, ref count);
+                state.Output.Write(escapedPropertyName);
+            }
+
+            using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
+            {
+                state.Output.Write('=');
+            }
+
+            count += Visit(state.Nest(), property.Value);
+        }
+
+        using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
+        {
+            state.Output.Write('}');
+        }
+
+        return count;
+    }
+
+    protected override int VisitDictionaryValue(ThemedValueFormatterState state, DictionaryValue dictionary)
+    {
+        var count = 0;
+
+        using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
+        {
+            state.Output.Write('{');
+        }
+
+        var delim = string.Empty;
+        foreach (var element in dictionary.Elements)
+        {
+            if (delim.Length != 0)
+            {
+                using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
+                {
+                    state.Output.Write(delim);
+                }
+            }
+
+            delim = ", ";
 
             using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
             {
                 state.Output.Write('[');
             }
 
-            var delim = string.Empty;
-
-            // ReSharper disable once ForCanBeConvertedToForeach
-            for (var index = 0; index < sequence.Elements.Count; ++index)
+            using (ApplyStyle(state.Output, RichTextBoxThemeStyle.String, ref count))
             {
-                if (delim.Length != 0)
-                {
-                    using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
-                    {
-                        state.Output.Write(delim);
-                    }
-                }
-
-                delim = ", ";
-                Visit(state, sequence.Elements[index]);
+                count += Visit(state.Nest(), element.Key);
             }
 
             using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
             {
-                state.Output.Write(']');
+                state.Output.Write("]=");
+            }
+
+            count += Visit(state.Nest(), element.Value);
+        }
+
+        using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
+        {
+            state.Output.Write('}');
+        }
+
+        return count;
+    }
+
+    public int FormatLiteralValue(ScalarValue scalar, TextWriter output, string format)
+    {
+        var value = scalar.Value;
+        var count = 0;
+
+        if (value is null)
+        {
+            using (ApplyStyle(output, RichTextBoxThemeStyle.Null, ref count))
+            {
+                output.Write("null");
             }
 
             return count;
         }
 
-        protected override int VisitStructureValue(ThemedValueFormatterState state, StructureValue structure)
+        if (value is string str)
         {
-            var count = 0;
-
-            if (structure.TypeTag != null)
+            using (ApplyStyle(output, RichTextBoxThemeStyle.String, ref count))
             {
-                using (ApplyStyle(state.Output, RichTextBoxThemeStyle.Name, ref count))
+                var escapedStr = SpecialCharsEscaping.Apply(str, ref count);
+
+                if (format != "l")
                 {
-                    state.Output.Write(structure.TypeTag);
+                    JsonValueFormatter.WriteQuotedJsonString(escapedStr, output);
                 }
-
-                state.Output.Write(' ');
-            }
-
-            using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
-            {
-                state.Output.Write('{');
-            }
-
-            var delim = string.Empty;
-
-            // ReSharper disable once ForCanBeConvertedToForeach
-            for (var index = 0; index < structure.Properties.Count; ++index)
-            {
-                if (delim.Length != 0)
+                else
                 {
-                    using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
-                    {
-                        state.Output.Write(delim);
-                    }
+                    output.Write(escapedStr);
                 }
-
-                delim = ", ";
-
-                var property = structure.Properties[index];
-
-                using (ApplyStyle(state.Output, RichTextBoxThemeStyle.Name, ref count))
-                {
-                    var escapedPropertyName = SpecialCharsEscaping.Apply(property.Name, ref count);
-                    state.Output.Write(escapedPropertyName);
-                }
-
-                using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
-                {
-                    state.Output.Write('=');
-                }
-
-                count += Visit(state.Nest(), property.Value);
-            }
-
-            using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
-            {
-                state.Output.Write('}');
             }
 
             return count;
         }
 
-        protected override int VisitDictionaryValue(ThemedValueFormatterState state, DictionaryValue dictionary)
+        if (value is ValueType)
         {
-            var count = 0;
-
-            using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
+            if (value is int || value is uint || value is long || value is ulong ||
+                value is decimal || value is byte || value is sbyte || value is short ||
+                value is ushort || value is float || value is double)
             {
-                state.Output.Write('{');
-            }
-
-            var delim = string.Empty;
-            foreach (var element in dictionary.Elements)
-            {
-                if (delim.Length != 0)
+                using (ApplyStyle(output, RichTextBoxThemeStyle.Number, ref count))
                 {
-                    using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
-                    {
-                        state.Output.Write(delim);
-                    }
-                }
-
-                delim = ", ";
-
-                using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
-                {
-                    state.Output.Write('[');
-                }
-
-                using (ApplyStyle(state.Output, RichTextBoxThemeStyle.String, ref count))
-                {
-                    count += Visit(state.Nest(), element.Key);
-                }
-
-                using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
-                {
-                    state.Output.Write("]=");
-                }
-
-                count += Visit(state.Nest(), element.Value);
-            }
-
-            using (ApplyStyle(state.Output, RichTextBoxThemeStyle.TertiaryText, ref count))
-            {
-                state.Output.Write('}');
-            }
-
-            return count;
-        }
-
-        public int FormatLiteralValue(ScalarValue scalar, TextWriter output, string format)
-        {
-            var value = scalar.Value;
-            var count = 0;
-
-            if (value is null)
-            {
-                using (ApplyStyle(output, RichTextBoxThemeStyle.Null, ref count))
-                {
-                    output.Write("null");
+                    scalar.Render(output, format, _formatProvider);
                 }
 
                 return count;
             }
 
-            if (value is string str)
+            if (value is bool b)
             {
-                using (ApplyStyle(output, RichTextBoxThemeStyle.String, ref count))
+                using (ApplyStyle(output, RichTextBoxThemeStyle.Boolean, ref count))
                 {
-                    var escapedStr = SpecialCharsEscaping.Apply(str, ref count);
-
-                    if (format != "l")
-                    {
-                        JsonValueFormatter.WriteQuotedJsonString(escapedStr, output);
-                    }
-                    else
-                    {
-                        output.Write(escapedStr);
-                    }
+                    output.Write(b.ToString(CultureInfo.InvariantCulture));
                 }
 
                 return count;
             }
 
-            if (value is ValueType)
+            if (value is char ch)
             {
-                if (value is int || value is uint || value is long || value is ulong ||
-                    value is decimal || value is byte || value is sbyte || value is short ||
-                    value is ushort || value is float || value is double)
+                using (ApplyStyle(output, RichTextBoxThemeStyle.Scalar, ref count))
                 {
-                    using (ApplyStyle(output, RichTextBoxThemeStyle.Number, ref count))
-                    {
-                        scalar.Render(output, format, _formatProvider);
-                    }
-
-                    return count;
+                    output.Write('\'');
+                    output.Write(SpecialCharsEscaping.Apply(ch.ToString(), ref count));
+                    output.Write('\'');
                 }
 
-                if (value is bool b)
-                {
-                    using (ApplyStyle(output, RichTextBoxThemeStyle.Boolean, ref count))
-                    {
-                        output.Write(b.ToString(CultureInfo.InvariantCulture));
-                    }
-
-                    return count;
-                }
-
-                if (value is char ch)
-                {
-                    using (ApplyStyle(output, RichTextBoxThemeStyle.Scalar, ref count))
-                    {
-                        output.Write('\'');
-                        output.Write(SpecialCharsEscaping.Apply(ch.ToString(), ref count));
-                        output.Write('\'');
-                    }
-
-                    return count;
-                }
+                return count;
             }
-
-            using (ApplyStyle(output, RichTextBoxThemeStyle.Scalar, ref count))
-            {
-                scalar.Render(output, format, _formatProvider);
-            }
-
-            return count;
         }
+
+        using (ApplyStyle(output, RichTextBoxThemeStyle.Scalar, ref count))
+        {
+            scalar.Render(output, format, _formatProvider);
+        }
+
+        return count;
     }
 }

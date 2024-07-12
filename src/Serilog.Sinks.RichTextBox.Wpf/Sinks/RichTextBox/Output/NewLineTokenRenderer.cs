@@ -1,4 +1,5 @@
 ﻿#region Copyright 2021-2023 C. Augusto Proiete & Contributors
+
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
 
 using System;
@@ -20,27 +22,26 @@ using Serilog.Events;
 using Serilog.Parsing;
 using Serilog.Sinks.RichTextBox.Rendering;
 
-namespace Serilog.Sinks.RichTextBox.Output
+namespace Serilog.Sinks.RichTextBox.Output;
+
+public class NewLineTokenRenderer : OutputTemplateTokenRenderer
 {
-    internal class NewLineTokenRenderer : OutputTemplateTokenRenderer
+    private readonly Alignment? _alignment;
+
+    public NewLineTokenRenderer(Alignment? alignment)
     {
-        private readonly Alignment? _alignment;
+        _alignment = alignment;
+    }
 
-        public NewLineTokenRenderer(Alignment? alignment)
+    public override void Render(LogEvent logEvent, TextWriter output)
+    {
+        if (_alignment.HasValue)
         {
-            _alignment = alignment;
+            Padding.Apply(output, Environment.NewLine, _alignment.Value.Widen(Environment.NewLine.Length));
         }
-
-        public override void Render(LogEvent logEvent, TextWriter output)
+        else
         {
-            if (_alignment.HasValue)
-            {
-                Padding.Apply(output, Environment.NewLine, _alignment.Value.Widen(Environment.NewLine.Length));
-            }
-            else
-            {
-                output.WriteLine();
-            }
+            output.WriteLine();
         }
     }
 }
